@@ -1,0 +1,6 @@
+{
+  "name": "Dolby By Shiblu",
+  "description": "Multi-device surround sound system over local Wi-Fi. Syncs 4 phones and 1 laptop into an immersive 5.1 / 4.0 spatial home theater with low latency and millisecond calibration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
