@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  workflow_dispatch: # Allows manual trigger
+  workflow_dispatch:
 
 jobs:
   build:
@@ -20,16 +20,28 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          cache: 'gradle'
 
-      - name: Grant Execute Permission for Gradlew
-        run: chmod +x gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+      - name: Generate Wrapper & Build Debug APK
+        run: |
+          # যদি ফাইলগুলো Dolby-Atmos-5-1-main ফোল্ডারের ভেতরে থাকে
+          if [ -d "Dolby-Atmos-5-1-main" ]; then
+            cd Dolby-Atmos-5-1-main
+          fi
+          
+          # gradlew ফাইল না থাকলে অটো তৈরি করবে
+          if [ ! -f "gradlew" ]; then
+            gradle wrapper
+          fi
+          
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: app/build/outputs/apk/debug/*.apk
+          name: Dolby-By-Shiblu-APK
+          path: |
+            **/app/build/outputs/apk/debug/*.apk
