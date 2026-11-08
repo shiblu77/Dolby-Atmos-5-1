@@ -21,17 +21,21 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-      - name: Generate Wrapper & Build Debug APK
+      - name: Generate Missing Keystore & Build APK
         run: |
-          # যদি ফাইলগুলো Dolby-Atmos-5-1-main ফোল্ডারের ভেতরে থাকে
           if [ -d "Dolby-Atmos-5-1-main" ]; then
             cd Dolby-Atmos-5-1-main
           fi
-          
-          # gradlew ফাইল না থাকলে অটো তৈরি করবে
+
+          # AI Studio-র মিসিং debug.keystore তৈরি করা
+          if [ ! -f "debug.keystore" ]; then
+            keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+          # gradlew তৈরি ও রান
           if [ ! -f "gradlew" ]; then
             gradle wrapper
           fi
