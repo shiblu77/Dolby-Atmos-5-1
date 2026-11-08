@@ -21,27 +21,29 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Generate Missing Keystore & Build APK
+      - name: Build Debug APK
         run: |
           if [ -d "Dolby-Atmos-5-1-main" ]; then
             cd Dolby-Atmos-5-1-main
           fi
 
-          # AI Studio-র মিসিং debug.keystore তৈরি করা
+          # ১. অ্যান্ড্রয়েড SDK লাইসেন্স অটো-অ্যাকসেপ্ট করা
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+          # ২. AI Studio-র মিসিং debug.keystore তৈরি করা
           if [ ! -f "debug.keystore" ]; then
             keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           fi
 
-          # gradlew তৈরি ও রান
+          # ৩. Gradle 9.3.1 এর সঠিক র্যাপার তৈরি করা
           if [ ! -f "gradlew" ]; then
-            gradle wrapper
+            gradle wrapper --gradle-version 9.3.1
           fi
           
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          
+          # ৪. টেস্ট ছাড়া দ্রুত এপিকে বিল্ড করা
+          ./gradlew assembleDebug -x test --no-daemon --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
